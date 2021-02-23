@@ -1,0 +1,518 @@
+{
+    "imports": [
+        "github.com/project-flogo/flow",
+        "git.tibco.com/git/product/ipaas/wi-postgres.git/src/app/PostgreSQL/activity/query",
+        "git.tibco.com/git/product/ipaas/wi-postgres.git/src/app/PostgreSQL/activity/insert",
+        "git.tibco.com/git/product/ipaas/wi-postgres.git/src/app/PostgreSQL/activity/update",
+        "git.tibco.com/git/product/ipaas/wi-postgres.git/src/app/PostgreSQL/activity/delete",
+        "git.tibco.com/git/product/ipaas/wi-contrib.git/contributions/General/activity/log",
+        "github.com/project-flogo/contrib/activity/actreturn",
+        "git.tibco.com/git/product/ipaas/wi-contrib.git/contributions/General/trigger/rest",
+        "github.com/project-flogo/contrib/function/string",
+        "git.tibco.com/git/product/ipaas/wi-postgres.git/src/app/PostgreSQL/connector/connection"
+    ],
+    "name": "PostgreSQL_CRUD",
+    "description": "",
+    "version": "1.0.0",
+    "type": "flogo:app",
+    "appModel": "1.1.1",
+    "feVersion": "2.10.0",
+    "triggers": [
+        {
+            "ref": "#rest",
+            "name": "tibco-wi-rest",
+            "description": "Simple REST Trigger",
+            "settings": {
+                "port": 9999,
+                "APISpecUpdate": false,
+                "swagger": "",
+                "secureConnection": false,
+                "serverKey": "",
+                "caCertificate": ""
+            },
+            "id": "ReceiveHTTPMessage",
+            "handlers": [
+                {
+                    "description": "",
+                    "settings": {
+                        "Method": "GET",
+                        "Path": "/postgres",
+                        "OutputValidation": false
+                    },
+                    "action": {
+                        "ref": "github.com/project-flogo/flow",
+                        "settings": {
+                            "flowURI": "res://flow:CRUD_Flow"
+                        },
+                        "output": {
+                            "data": {
+                                "mapping": {
+                                    "output": "=$.output"
+                                }
+                            }
+                        }
+                    },
+                    "reply": {
+                        "code": 200,
+                        "configureResponseCodes": false,
+                        "message": {}
+                    },
+                    "schemas": {
+                        "reply": {
+                            "data": {
+                                "type": "json",
+                                "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"output\":{\"type\":\"string\"}}}",
+                                "fe_metadata": "{\n    \"output\":\"string\"\n}"
+                            },
+                            "responseBody": {
+                                "type": "json",
+                                "value": "{\"type\":\"object\",\"properties\":{\"body\":{\"type\":\"any\"},\"headers\":{\"type\":\"object\"}}}",
+                                "fe_metadata": "{\"type\":\"object\",\"properties\":{\"body\":{\"type\":\"any\"},\"headers\":{\"type\":\"object\"}}}"
+                            }
+                        },
+                        "output": {
+                            "headers": {
+                                "type": "json",
+                                "value": "{\"type\":\"object\",\"properties\":{\"Accept\":{\"type\":\"string\",\"visible\":false},\"Accept-Charset\":{\"type\":\"string\",\"visible\":false},\"Accept-Encoding\":{\"type\":\"string\",\"visible\":false},\"Content-Type\":{\"type\":\"string\",\"visible\":false},\"Content-Length\":{\"type\":\"string\",\"visible\":false},\"Connection\":{\"type\":\"string\",\"visible\":false},\"Cookie\":{\"type\":\"string\",\"visible\":false},\"Pragma\":{\"type\":\"string\",\"visible\":false}},\"required\":[]}",
+                                "fe_metadata": "[{\"parameterName\":\"Accept\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Charset\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Encoding\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Type\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Length\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Connection\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Cookie\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Pragma\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false}]"
+                            }
+                        }
+                    },
+                    "name": "CRUD_Flow"
+                }
+            ]
+        }
+    ],
+    "resources": [
+        {
+            "id": "flow:CRUD_Flow",
+            "data": {
+                "name": "CRUD_Flow",
+                "description": "",
+                "links": [
+                    {
+                        "id": 1,
+                        "from": "PostgreSQLQuery",
+                        "to": "PostgreSQLInsert",
+                        "type": "default"
+                    },
+                    {
+                        "id": 2,
+                        "from": "PostgreSQLInsert",
+                        "to": "PostgreSQLUpdate",
+                        "type": "default"
+                    },
+                    {
+                        "id": 3,
+                        "from": "PostgreSQLUpdate",
+                        "to": "PostgreSQLDelete",
+                        "type": "default"
+                    },
+                    {
+                        "id": 4,
+                        "from": "PostgreSQLDelete",
+                        "to": "LogMessage",
+                        "type": "default"
+                    },
+                    {
+                        "id": 5,
+                        "from": "LogMessage",
+                        "to": "Return",
+                        "type": "default"
+                    }
+                ],
+                "tasks": [
+                    {
+                        "id": "PostgreSQLQuery",
+                        "name": "PostgreSQLQuery",
+                        "description": "This activity executes query on a PostgreSQL database",
+                        "activity": {
+                            "ref": "#query",
+                            "input": {
+                                "Connection": "conn://19e05450-e229-11ea-b494-4d91f254c7bd",
+                                "QueryName": "",
+                                "Query": "SELECT id as \"ID\", farm_id as \"FarmID\",name as \"Name\" \nFROM animal \nWHERE ID >= ?id;",
+                                "manualmode": false,
+                                "Fields": [
+                                    {
+                                        "FieldName": "Name",
+                                        "Type": "VARCHAR",
+                                        "Selected": true,
+                                        "Parameter": false,
+                                        "isEditable": false,
+                                        "Ordinal": 0
+                                    },
+                                    {
+                                        "FieldName": "ID",
+                                        "Type": "INT4",
+                                        "Selected": true,
+                                        "Parameter": false,
+                                        "isEditable": false,
+                                        "Ordinal": 0
+                                    },
+                                    {
+                                        "FieldName": "FarmID",
+                                        "Type": "INT4",
+                                        "Selected": true,
+                                        "Parameter": false,
+                                        "isEditable": false,
+                                        "Ordinal": 0
+                                    },
+                                    {
+                                        "FieldName": "id",
+                                        "Type": "INT4",
+                                        "Selected": false,
+                                        "Parameter": true,
+                                        "isEditable": false,
+                                        "Ordinal": 0
+                                    }
+                                ],
+                                "RuntimeQuery": "",
+                                "State": "90b5e801-60b5-41d7-95d4-eab3ac6fd7b4SELECT id as \"ID\", farm_id as \"FarmID\",name as \"Name\" \nFROM animal \nWHERE ID >= ?id;",
+                                "input": {
+                                    "mapping": {
+                                        "parameters": {
+                                            "id": 111
+                                        }
+                                    }
+                                }
+                            },
+                            "schemas": {
+                                "input": {
+                                    "input": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"parameters\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"}}}}}",
+                                        "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"parameters\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"}}}}}"
+                                    }
+                                },
+                                "output": {
+                                    "Output": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"records\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"Name\":{\"type\":\"string\"},\"ID\":{\"type\":\"integer\"},\"FarmID\":{\"type\":\"integer\"}}}}}}",
+                                        "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"records\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"Name\":{\"type\":\"string\"},\"ID\":{\"type\":\"integer\"},\"FarmID\":{\"type\":\"integer\"}}}}}}"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "id": "PostgreSQLInsert",
+                        "name": "PostgreSQLInsert",
+                        "description": "This activity executes insert on a PostgreSQL database",
+                        "activity": {
+                            "ref": "#insert",
+                            "input": {
+                                "Connection": "conn://19e05450-e229-11ea-b494-4d91f254c7bd",
+                                "QueryName": "",
+                                "Query": "INSERT INTO animal\nVALUES(?Id,?farmid,?Name)\nReturning *;",
+                                "manualmode": false,
+                                "Fields": [
+                                    {
+                                        "FieldName": "Id",
+                                        "Type": "INT4",
+                                        "Selected": false,
+                                        "Parameter": true,
+                                        "isEditable": false,
+                                        "Ordinal": 0,
+                                        "Value": false
+                                    },
+                                    {
+                                        "FieldName": "farmid",
+                                        "Type": "INT4",
+                                        "Selected": false,
+                                        "Parameter": true,
+                                        "isEditable": false,
+                                        "Ordinal": 0,
+                                        "Value": false
+                                    },
+                                    {
+                                        "FieldName": "Name",
+                                        "Type": "VARCHAR",
+                                        "Selected": false,
+                                        "Parameter": true,
+                                        "isEditable": false,
+                                        "Ordinal": 0,
+                                        "Value": false
+                                    },
+                                    {
+                                        "FieldName": "id",
+                                        "Type": "INT4",
+                                        "Selected": true,
+                                        "Parameter": false,
+                                        "isEditable": false,
+                                        "Ordinal": 1,
+                                        "Value": true
+                                    },
+                                    {
+                                        "FieldName": "farm_id",
+                                        "Type": "INT4",
+                                        "Selected": true,
+                                        "Parameter": false,
+                                        "isEditable": false,
+                                        "Ordinal": 2,
+                                        "Value": true
+                                    },
+                                    {
+                                        "FieldName": "name",
+                                        "Type": "VARCHAR",
+                                        "Selected": true,
+                                        "Parameter": false,
+                                        "isEditable": false,
+                                        "Ordinal": 3,
+                                        "Value": true
+                                    }
+                                ],
+                                "RuntimeQuery": "",
+                                "State": "3d0eb588-794e-4a0a-9f43-f336890d14a8INSERT INTO animal\nVALUES(?Id,?farmid,?Name)\nReturning *;",
+                                "input": {
+                                    "mapping": {
+                                        "parameters": {
+                                            "Id": 151,
+                                            "farmid": 151,
+                                            "Name": "TEST151"
+                                        }
+                                    }
+                                }
+                            },
+                            "schemas": {
+                                "input": {
+                                    "input": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"values\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"},\"farm_id\":{\"type\":\"integer\"},\"name\":{\"type\":\"string\"}}}},\"parameters\":{\"type\":\"object\",\"properties\":{\"Id\":{\"type\":\"integer\"},\"farmid\":{\"type\":\"integer\"},\"Name\":{\"type\":\"string\"}}}}}",
+                                        "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"values\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"},\"farm_id\":{\"type\":\"integer\"},\"name\":{\"type\":\"string\"}}}},\"parameters\":{\"type\":\"object\",\"properties\":{\"Id\":{\"type\":\"integer\"},\"farmid\":{\"type\":\"integer\"},\"Name\":{\"type\":\"string\"}}}}}"
+                                    }
+                                },
+                                "output": {
+                                    "Output": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"records\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"},\"farm_id\":{\"type\":\"integer\"},\"name\":{\"type\":\"string\"}}}}}}",
+                                        "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"records\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"},\"farm_id\":{\"type\":\"integer\"},\"name\":{\"type\":\"string\"}}}}}}"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "id": "PostgreSQLUpdate",
+                        "name": "PostgreSQLUpdate",
+                        "description": "This activity executes update on a PostgreSQL database",
+                        "activity": {
+                            "ref": "#update",
+                            "input": {
+                                "Connection": "conn://19e05450-e229-11ea-b494-4d91f254c7bd",
+                                "UpdateName": "",
+                                "Query": "UPDATE animal\nSET name = ?Name\nWHERE id = ?Id;",
+                                "manualmode": false,
+                                "RuntimeQuery": "",
+                                "Fields": [
+                                    {
+                                        "FieldName": "Name",
+                                        "Type": "VARCHAR",
+                                        "Selected": false,
+                                        "Parameter": true,
+                                        "isEditable": false,
+                                        "Ordinal": 0
+                                    },
+                                    {
+                                        "FieldName": "Id",
+                                        "Type": "INT4",
+                                        "Selected": false,
+                                        "Parameter": true,
+                                        "isEditable": false,
+                                        "Ordinal": 0
+                                    },
+                                    {
+                                        "FieldName": "name",
+                                        "Type": "VARCHAR",
+                                        "Selected": false,
+                                        "Parameter": false,
+                                        "isEditable": false,
+                                        "Ordinal": 3,
+                                        "Value": true
+                                    }
+                                ],
+                                "State": "ad38e638-acd8-4337-bf2d-825340bd33d1UPDATE animal\nSET name = ?Name\nWHERE id = ?Id;",
+                                "input": {
+                                    "mapping": {
+                                        "parameters": {
+                                            "Name": "TEST47test",
+                                            "Id": 47
+                                        }
+                                    }
+                                }
+                            },
+                            "schemas": {
+                                "input": {
+                                    "input": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"parameters\":{\"type\":\"object\",\"properties\":{\"Name\":{\"type\":\"string\"},\"Id\":{\"type\":\"integer\"}}}}}",
+                                        "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"parameters\":{\"type\":\"object\",\"properties\":{\"Name\":{\"type\":\"string\"},\"Id\":{\"type\":\"integer\"}}}}}"
+                                    }
+                                },
+                                "output": {
+                                    "Output": {
+                                        "type": "json",
+                                        "value": "{\"type\":\"object\",\"properties\":{\"rowsAffected\":{\"type\":\"int\"}}}",
+                                        "fe_metadata": "{\"type\":\"object\",\"properties\":{\"rowsAffected\":{\"type\":\"int\"}}}"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "id": "PostgreSQLDelete",
+                        "name": "PostgreSQLDelete",
+                        "description": "This activity executes delete on a PostgreSQL database",
+                        "activity": {
+                            "ref": "#delete",
+                            "input": {
+                                "Connection": "conn://19e05450-e229-11ea-b494-4d91f254c7bd",
+                                "QueryName": "",
+                                "Query": "DELETE FROM animal\nWHERE farm_id = ?farmid;",
+                                "manualmode": false,
+                                "RuntimeQuery": "",
+                                "Fields": [
+                                    {
+                                        "FieldName": "farmid",
+                                        "Type": "INT4",
+                                        "Selected": false,
+                                        "Parameter": true,
+                                        "isEditable": false,
+                                        "Ordinal": 0
+                                    }
+                                ],
+                                "State": "8f5ba512-8979-44e7-aec3-dd304fb1f0bfDELETE FROM animal\nWHERE farm_id = ?farmid;",
+                                "input": {
+                                    "mapping": {
+                                        "parameters": {
+                                            "farmid": 101
+                                        }
+                                    }
+                                }
+                            },
+                            "schemas": {
+                                "input": {
+                                    "input": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"parameters\":{\"type\":\"object\",\"properties\":{\"farmid\":{\"type\":\"integer\"}}}}}",
+                                        "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"parameters\":{\"type\":\"object\",\"properties\":{\"farmid\":{\"type\":\"integer\"}}}}}"
+                                    }
+                                },
+                                "output": {
+                                    "Output": {
+                                        "type": "json",
+                                        "value": "{\"type\":\"object\",\"properties\":{\"rowsAffected\":{\"type\":\"int\"}}}",
+                                        "fe_metadata": "{\"type\":\"object\",\"properties\":{\"rowsAffected\":{\"type\":\"int\"}}}"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "id": "LogMessage",
+                        "name": "LogMessage",
+                        "description": "Simple Log Message Activity",
+                        "activity": {
+                            "ref": "#log",
+                            "input": {
+                                "Log Level": "INFO",
+                                "flowInfo": false,
+                                "message": "=string.concat(string.tostring($activity[PostgreSQLQuery].Output),string.tostring($activity[PostgreSQLInsert].Output),string.tostring($activity[PostgreSQLUpdate].Output),string.tostring($activity[PostgreSQLDelete].Output))"
+                            }
+                        }
+                    },
+                    {
+                        "id": "Return",
+                        "name": "Return",
+                        "description": "Simple Return Activity",
+                        "activity": {
+                            "ref": "#actreturn",
+                            "settings": {
+                                "mappings": {
+                                    "output": "PostgreSQL CRUD Done"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "metadata": {
+                    "input": [],
+                    "output": [
+                        {
+                            "name": "output",
+                            "type": "string"
+                        }
+                    ],
+                    "fe_metadata": {
+                        "output": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"output\":{\"type\":\"string\"}}}"
+                    }
+                },
+                "explicitReply": true
+            }
+        }
+    ],
+    "properties": [
+        {
+            "name": "PostgreSQL.PostgreSQLConn.Host",
+            "type": "string",
+            "value": "54.153.30.86"
+        },
+        {
+            "name": "PostgreSQL.PostgreSQLConn.Port",
+            "type": "float64",
+            "value": 5433
+        },
+        {
+            "name": "PostgreSQL.PostgreSQLConn.Database_Name",
+            "type": "string",
+            "value": "university"
+        },
+        {
+            "name": "PostgreSQL.PostgreSQLConn.User",
+            "type": "string",
+            "value": "admin"
+        },
+        {
+            "name": "PostgreSQL.PostgreSQLConn.Password",
+            "type": "string",
+            "value": "SECRET:OAThtSFvWGKrysIZ85R7wgPK3ErYR3wr"
+        },
+        {
+            "name": "PostgreSQL.PostgreSQLConn.Maximum_Open_Connections",
+            "type": "float64",
+            "value": 0
+        },
+        {
+            "name": "PostgreSQL.PostgreSQLConn.Maximum_Idle_Connections",
+            "type": "float64",
+            "value": 2
+        },
+        {
+            "name": "PostgreSQL.PostgreSQLConn.Maximum_Connection_Lifetime",
+            "type": "string",
+            "value": 0
+        }
+    ],
+    "connections": {
+        "19e05450-e229-11ea-b494-4d91f254c7bd": {
+            "id": "19e05450-e229-11ea-b494-4d91f254c7bd",
+            "name": "PostgreSQLConn",
+            "ref": "#connection",
+            "settings": {
+                "name": "PostgreSQLConn",
+                "description": "",
+                "host": "=$property[\"PostgreSQL.PostgreSQLConn.Host\"]",
+                "port": "=$property[\"PostgreSQL.PostgreSQLConn.Port\"]",
+                "databaseName": "=$property[\"PostgreSQL.PostgreSQLConn.Database_Name\"]",
+                "user": "=$property[\"PostgreSQL.PostgreSQLConn.User\"]",
+                "password": "=$property[\"PostgreSQL.PostgreSQLConn.Password\"]",
+                "maxopenconnection": "=$property[\"PostgreSQL.PostgreSQLConn.Maximum_Open_Connections\"]",
+                "maxidleconnection": "=$property[\"PostgreSQL.PostgreSQLConn.Maximum_Idle_Connections\"]",
+                "connmaxlifetime": "=$property[\"PostgreSQL.PostgreSQLConn.Maximum_Connection_Lifetime\"]",
+                "onprem": false
+            }
+        }
+    },
+    "contrib": "W3sicmVmIjoiZ2l0LnRpYmNvLmNvbS9naXQvcHJvZHVjdC9pcGFhcy93aS1jb250cmliLmdpdC9jb250cmlidXRpb25zL0dlbmVyYWwiLCJzM2xvY2F0aW9uIjoiVGliY28vR2VuZXJhbCJ9LHsicmVmIjoiZ2l0LnRpYmNvLmNvbS9naXQvcHJvZHVjdC9pcGFhcy93aS1wb3N0Z3Jlcy5naXQvc3JjL2FwcC9Qb3N0Z3JlU1FMIiwiczNsb2NhdGlvbiI6IlRpYmNvL1Bvc3RncmVTUUwifV0=",
+    "fe_metadata": "UEsDBAoAAAAIAHV2E1GrqSRGFQAAABMAAAAIAAAAYXBwLmpzb26rViopykxPTy1yy8kvL1ayio6tBQBQSwECFAAKAAAACAB1dhNRq6kkRhUAAAATAAAACAAAAAAAAAAAAAAAAAAAAAAAYXBwLmpzb25QSwUGAAAAAAEAAQA2AAAAOwAAAAAA"
+}
