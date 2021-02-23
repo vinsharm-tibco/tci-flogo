@@ -15,7 +15,7 @@ PostgreSQL CRUD app bascially contains 4 activities. The main purpose of these a
 1. Download the sample json file i.e., PostgreSQL_CRUD.json.
 
 2. Create a new empty app
-![Create an app](../import-screenshots/postgres_screenshot/1.png)
+![Create an app](../app-dev/import-screenshots/postgres_screenshot/1.png)
 
 3. On the app details page, select import app option.
 ![Select import](../import-screenshots/3.png)
