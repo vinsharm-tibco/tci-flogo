@@ -1,4 +1,4 @@
-# PostgreSQL CRUD Operations Example
+# PostgreSQL CRUD Example
 
 
 ## Description
@@ -15,22 +15,22 @@ PostgreSQL CRUD app bascially contains 4 activities. The main purpose of these a
 1. Download the sample json file i.e., PostgreSQL_CRUD.json.
 
 2. Create a new empty app
-![Create an app](../app-dev/import-screenshots/postgres_screenshot/1.png)
+![Create an app](../../import-screenshots/postgres_screenshot/1.png)
 
 3. On the app details page, select import app option.
-![Select import](../import-screenshots/3.png)
+![Select import](../../import-screenshots/postgres_screenshot/2.png)
 
 4. Now click on ‘browse to upload’ button and select the app.json from your machine that you want to import.
-![Import your sample](../import-screenshots/rest-auth/11.png)
+![Import your sample](../../import-screenshots/postgres_screenshot/3.png)
 
 5. Click on Upload Button. The Import app dialog displays some generic errors and warnings as well as any specific errors or warnings pertaining to the app you are importing.
-![The Import app dialog](../import-screenshots/rest-auth/12.png)
+![The Import app dialog](../../import-screenshots/postgres_screenshot/4.png)
 
 6. In Import App dialog, there are 2 options to import:
 
-Selective Import – If you are choosing this option then select trigger, flow and connection and click Next.
+* Selective Import – If you are choosing this option then select trigger, flow and connection and click Next.
 
-Import all – If you are choosing this option then it will import all flows from the source app.
+* Import all – If you are choosing this option then it will import all flows from the source app.
 
 7. After importing app is done, in connection tab make sure to re-enter the password and click on connect button to establish the connection.
 
@@ -40,35 +40,41 @@ Import all – If you are choosing this option then it will import all flows fro
 
 When you import the app you need to re-enter the password and establish the connection.
 
-![The connection](../import-screenshots/rest-auth/6.png)
+![The connection](../../import-screenshots/postgres_screenshot/5.png)
+![The connection](../../import-screenshots/postgres_screenshot/6.png)
+![The connection](../../import-screenshots/postgres_screenshot/7.png)
 
 In the connection, note that,
 1. Host - In this field we give public ip/public DNS of EC2 instance on which database is hosted.
-2. Maximum Connection Retry Attempts - In this field we give maximum number of attempts to reconnect with a database server in case connection failure.
-3. Connection Retry Delay - In this field we pass number of seconds to wait between connection retry attempts.
+2. Maximum Connection Retry Attempts - maximum number of attempts to reconnect with a database server in case connection failure. Default value is 3
+3. Connection Retry Delay - number of seconds to wait between connection retry attempts. Default value is 5 in sec.
 
 ### The Flow
 
 If you go inside the app, you can see in flow we have 4 activities (Insert, Update, Delete and Query)  that perform some operations.
 Also in flow we have Log Message and Return Activity for getting the output.
-![Sample Response](../import-screenshots/rest-auth/10.png)
+![Sample Response](../../import-screenshots/postgres_screenshot/8.png)
 
 ### Run the application
 For running the application, first you have to push the app and then scale up the app.
-Then after sometime you can see you app in running status.
-![Sample Response](../import-screenshots/rest-auth/9.png)
+Then after sometime you can see your app in running status.
+![Sample Response](../../import-screenshots/postgres_screenshot/9.png)
+![Sample Response](../../import-screenshots/postgres_screenshot/10.png)
+![Sample Response](../../import-screenshots/postgres_screenshot/11.png)
 Once your app reaches to Running state, go to Endpoints and for GET/tasks, select 'Try it Out’ option and then click on execute.
 
-Another option, If you want to test the sample in the Flow tester then in flow 
-click on Test Button -> create Launch configuration -> click Next button -> click on Run
+Another option, If you want to test the sample in the Flow tester then follow below instructions: 
+in flow, click on Test Button -> create Launch configuration -> click Next button -> click on Run
+![sample Response] (../../import-screenshots/postgres_screenshot/12.png)
+![Sample Response](../../import-screenshots/postgres_screenshot/13.png)
 
 ## Outputs
 
-1. Sample Response
-![Sample Response](../import-screenshots/rest-auth/7.png)
+1. Flow Tester
+![Sample Response](../../import-screenshots/postgres_screenshot/14.png)
 
-2. Sample Logs
-![Sample Logs](../import-screenshots/rest-auth/8.png)
+2. When hit endpoints
+![Sample Response](../../import-screenshots/postgres_screenshot/15.png)
 
 
 ## Troubleshooting
