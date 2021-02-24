@@ -73,7 +73,7 @@ Another option, If you want to test the sample in the Flow tester then follow be
  
 in flow, click on Test Button -> create Launch configuration -> click Next button -> click on Run
 
-![sample Response] (../../import-screenshots/postgres_screenshot/12.png)
+![sample Response](../../import-screenshots/postgres_screenshot/12.png)
 ![Sample Response](../../import-screenshots/postgres_screenshot/13.png)
 
 ## Outputs
