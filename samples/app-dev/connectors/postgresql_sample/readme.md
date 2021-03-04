@@ -95,7 +95,7 @@ in flow, click on Test Button -> create Launch configuration -> click Next butto
 * If you see test connection failed in connection tab, then check your public ip if it is whitelisted or not.
 
 ## Contributing
-If you want to build your own activities for Flogo please read the docs here.
+If you want to build your own activities for Flogo please read the docs here. [Flogo-docs](https://tibcosoftware.github.io/flogo/)
 
 If you want to showcase your project, check out [tci-awesome](https://github.com/TIBCOSoftware/tci-awesome)
 
